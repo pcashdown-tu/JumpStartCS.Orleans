@@ -50,9 +50,9 @@ namespace JumpStartCS.Orleans.Grains.Grains
             await _customerState.WriteStateAsync();
         }
 
-        public async Task<decimal> GetNetWorth()
+        public Task<decimal> GetNetWorth()
         {
-            return _customerState.State.CheckingAccountBalanceById.Values.Sum();
+            return Task.FromResult(_customerState.State.CheckingAccountBalanceById.Values.Sum());
         }
 
         public Task OnCompletedAsync()

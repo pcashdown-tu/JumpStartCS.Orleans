@@ -137,8 +137,8 @@ namespace JumpStartCS.Orleans.Grains.Grains
             {
                 await Task.Delay(TimeSpan.FromSeconds(workDurationSeconds), grainCancellationToken.CancellationToken);
             }
-            catch (TaskCanceledException _)
-            {
+            catch (TaskCanceledException)
+			{
                 return;
             }
         }

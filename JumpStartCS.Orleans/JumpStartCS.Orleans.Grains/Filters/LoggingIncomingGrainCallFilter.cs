@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Orleans.Runtime;
 
 namespace JumpStartCS.Orleans.Grains.Filters
 {
@@ -13,8 +14,9 @@ namespace JumpStartCS.Orleans.Grains.Filters
 
         public async Task Invoke(IIncomingGrainCallContext context)
         {
-            _logger.LogInformation($"Incoming Silo Grain Filter: Recived grain call on '{context.Grain}' to '{context.MethodName}' method");
-
+			if (context.InterfaceType.ToString() != "Orleans.Runtime.IGrainTimerInvoker") {	// Reduce streams timer spam
+	            _logger.LogInformation($"Incoming Silo Grain Filter: Recived grain call on '{context.Grain}' to '{context.InterfaceName}.{context.MethodName}' method");
+			}
             await context.Invoke();
         }
     }

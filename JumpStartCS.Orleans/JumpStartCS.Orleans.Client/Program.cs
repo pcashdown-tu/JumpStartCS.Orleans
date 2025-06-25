@@ -57,7 +57,7 @@ app.MapPost("checkingaccount", async (
         await checkingAccountGrain.Initialise(createAccount.OpeningBalance);
     });
 
-    return TypedResults.Created($"checkingaccounnt/{checkingAccountId}");
+    return TypedResults.Created($"checkingaccount/{checkingAccountId}");
 });
 
 app.MapPost("checkingaccount/{checkingAccountId}/debit", async (
@@ -174,12 +174,13 @@ app.MapGet("atm/{atmId}/balance", async (
     return TypedResults.Ok(balance);
 });
 
-app.MapPost("atm/{atmId}/withdrawl", async (
+app.MapPost("atm/{atmId}/withdraw", async (
     Guid atmId,
     AtmWithdrawl atmWithdrawl,
     ITransactionClient transactionClient,
     IClusterClient clusterClient) =>
 {
+/*
     await transactionClient.RunTransaction(TransactionOption.Create, async () =>
     {
         var atmGrain = clusterClient.GetGrain<IAtmGrain>(atmId);
@@ -190,6 +191,12 @@ app.MapPost("atm/{atmId}/withdrawl", async (
 
         await checkingAccountGrain.Debit(atmWithdrawl.Amount);
     });
+*/
+	var grain = clusterClient.GetGrain<IATMWithdrawerGrain>(0);
+
+	await grain.Withdraw(atmId, atmWithdrawl.CheckingAccountId, atmWithdrawl.Amount);
+
+    return TypedResults.NoContent();
 });
 
 app.MapGet("customer/{customerId}/networth", async (
