@@ -1,18 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="8.2.0" />
-    <PackageReference Include="Microsoft.Orleans.Reminders" Version="8.2.0" />
-    <PackageReference Include="Microsoft.Orleans.Runtime" Version="8.2.0" />
-    <PackageReference Include="Microsoft.Orleans.Sdk" Version="8.2.0" />
-    <PackageReference Include="Microsoft.Orleans.Streaming" Version="8.2.0" />
-    <PackageReference Include="Microsoft.Orleans.Transactions" Version="8.2.0" />
+    <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="9.1.2" />
+    <PackageReference Include="Microsoft.Orleans.Reminders" Version="9.1.2" />
+    <PackageReference Include="Microsoft.Orleans.Runtime" Version="9.1.2" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" Version="9.1.2" />
+    <PackageReference Include="Microsoft.Orleans.Streaming" Version="9.1.2" />
+    <PackageReference Include="Microsoft.Orleans.Transactions" Version="9.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Utils/SQL/PostgreSQL-Main.sql" />
+    <EmbeddedResource Include="Utils/SQL/PostgreSQL-Clustering.sql" />
+    <EmbeddedResource Include="Utils/SQL/PostgreSQL-Persistence.sql" />
+    <EmbeddedResource Include="Utils/SQL/PostgreSQL-Reminders.sql" />
+    <EmbeddedResource Include="Utils/SQL/PostgreSQL-Streaming.sql" />
+    <EmbeddedResource Include="Utils/SQL/PostgreSQL-Transactions.sql" />
+  </ItemGroup>
 </Project>

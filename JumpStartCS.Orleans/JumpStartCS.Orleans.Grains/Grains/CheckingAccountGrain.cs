@@ -17,7 +17,7 @@ namespace JumpStartCS.Orleans.Grains.Grains
         public CheckingAccountGrain(
             ITransactionClient transactionClient,
             [TransactionalState("balance")] ITransactionalState<BalanceState> balanceTransactionalState,
-            [PersistentState("checkingAccount", "blobStorage")] IPersistentState<CheckingAccountState> checkingAccountState)
+            [PersistentState("checkingAccount", "tableStorage")] IPersistentState<CheckingAccountState> checkingAccountState)
         {
             _transactionClient = transactionClient;
             _balanceTransactionalState = balanceTransactionalState;

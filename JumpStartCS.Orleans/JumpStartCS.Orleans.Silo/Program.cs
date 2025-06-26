@@ -1,60 +1,74 @@
-﻿using Azure.Storage.Queues;
-using JumpStartCS.Orleans.Grains.Filters;
+﻿using JumpStartCS.Orleans.Grains.Filters;
 using Microsoft.Extensions.Hosting;
 using Orleans.Configuration;
+using Roshambofu.Utils;
+using Orleans.Transactions.AdoNet.Hosting;
 
-await Host.CreateDefaultBuilder(args)
-    .UseOrleans(siloBuilder =>
-    {
-    siloBuilder.UseAzureStorageClustering(configureOptions: options =>
-    {
-        options.TableServiceClient = new Azure.Data.Tables.TableServiceClient("UseDevelopmentStorage=true;");
-    });
+DotEnv.Load();
 
-    siloBuilder.Configure<ClusterOptions>(options =>
-    {
-        options.ClusterId = "JumpstartCSCluster";
-        options.ServiceId = "JumpstartCSService";
-    });
+var builder = Host.CreateDefaultBuilder(args);
 
-    siloBuilder.AddAzureTableGrainStorage("tableStorage", configureOptions: options =>
-    {
-        options.TableServiceClient = new Azure.Data.Tables.TableServiceClient("UseDevelopmentStorage=true;");
-    });
+builder.UseOrleans(siloBuilder =>
+{
+	siloBuilder.UseAdoNetClustering(options =>
+	{
+		options.Invariant = "Npgsql";
+		options.ConnectionString = DbUtils.GetConnectionString();
+	});
 
-    siloBuilder.AddAzureBlobGrainStorage("blobStorage", configureOptions: options =>
-    {
-        options.BlobServiceClient = new Azure.Storage.Blobs.BlobServiceClient("UseDevelopmentStorage=true;");
-    });
+	siloBuilder.Configure<ClusterOptions>(options =>
+	{
+		options.ClusterId = "JumpstartCSCluster";
+		options.ServiceId = "JumpstartCSService";
+	});
 
-    siloBuilder.UseAzureTableReminderService(configureOptions: options =>
-    {
-        options.Configure(o => o.TableServiceClient = new Azure.Data.Tables.TableServiceClient("UseDevelopmentStorage=true;"));
-    });
+	siloBuilder.AddAdoNetGrainStorage("tableStorage", options =>
+	{
+		options.Invariant = "Npgsql";
+		options.ConnectionString = DbUtils.GetConnectionString();
+	});
 
-    siloBuilder.AddAzureTableTransactionalStateStorageAsDefault(configureOptions: options =>
-    {
-        options.TableServiceClient = new Azure.Data.Tables.TableServiceClient("UseDevelopmentStorage=true;");
-    });
+	siloBuilder.UseAdoNetReminderService(options =>
+	{
+		options.Invariant = "Npgsql";
+		options.ConnectionString = DbUtils.GetConnectionString();
+	});
 
-    siloBuilder.UseTransactions();
+	siloBuilder.AddAdoNetTransactionalStateStorageAsDefault(options =>
+	{
+		options.Invariant = "Npgsql";
+		options.ConnectionString = DbUtils.GetConnectionString();
+	});
 
-    siloBuilder.AddAzureQueueStreams("StreamProvider", optionsBuilder =>
-    {
-        optionsBuilder.Configure(options => { options.QueueServiceClient = new QueueServiceClient("UseDevelopmentStorage=true;"); });
-    })
-    .AddAzureTableGrainStorage("PubSubStore", configureOptions: options =>
-    {
-        options.Configure(o => o.TableServiceClient = new Azure.Data.Tables.TableServiceClient("UseDevelopmentStorage=true;"));
-    });
+	siloBuilder.UseTransactions();
 
-    siloBuilder.AddIncomingGrainCallFilter<LoggingIncomingGrainCallFilter>();
+	siloBuilder.AddAdoNetStreams("StreamProvider", options =>
+	{
+		options.Invariant = "Npgsql";
+		options.ConnectionString = DbUtils.GetConnectionString();
+	});
 
-        //siloBuilder.Configure<GrainCollectionOptions>(options =>
-        //{
-        //    options.CollectionQuantum = TimeSpan.FromSeconds(20);
+	siloBuilder.AddAdoNetGrainStorage("PubSubStore", options =>
+	{
+		options.Invariant = "Npgsql";
+		options.ConnectionString = DbUtils.GetConnectionString();
+	});
 
-        //    options.CollectionAge = TimeSpan.FromSeconds(20);
-        //});
+	siloBuilder.AddIncomingGrainCallFilter<LoggingIncomingGrainCallFilter>();
 
-    }).RunConsoleAsync();
+	//siloBuilder.Configure<GrainCollectionOptions>(options =>
+	//{
+	//    options.CollectionQuantum = TimeSpan.FromSeconds(20);
+
+	//    options.CollectionAge = TimeSpan.FromSeconds(20);
+	//});
+
+});
+
+var app = builder.Build();
+
+UtilsHelper.Initialize(app.Services);
+
+DbUtils.SetupAdoNetGrainStorageTables();
+
+await app.RunAsync();

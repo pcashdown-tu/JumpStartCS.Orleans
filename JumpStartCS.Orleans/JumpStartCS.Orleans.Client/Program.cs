@@ -2,15 +2,18 @@ using JumpStartCS.Orleans.Client.Contracts;
 using JumpStartCS.Orleans.Grains.Abstractions;
 using JumpStartCS.Orleans.Grains.Filters;
 using Orleans.Configuration;
+using Roshambofu.Utils;
+
+DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseOrleansClient((context, client) =>
 {
-    client.UseAzureStorageClustering(configureOptions: options =>
-    {
-        options.TableServiceClient = new Azure.Data.Tables.TableServiceClient("UseDevelopmentStorage=true;");
-    });
+    client.UseAdoNetClustering(options => {
+		options.Invariant = "Npgsql";
+		options.ConnectionString = DbUtils.GetConnectionString();
+	});
 
     client.Configure<ClusterOptions>(options =>
     {
@@ -24,6 +27,8 @@ builder.Host.UseOrleansClient((context, client) =>
 });
 
 var app = builder.Build();
+
+UtilsHelper.Initialize(app.Services);
 
 app.MapGet("checkingaccount/{checkingAccountId}/balance", 
     async (
